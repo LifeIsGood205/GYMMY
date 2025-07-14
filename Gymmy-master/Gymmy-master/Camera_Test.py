@@ -20,10 +20,13 @@ from Joint import Joint
 import Settings as s
 import Excel
 from Audio import say
-from performance_classification import feature_extraction, predict_performance, plot_data
+#from performance_classification import feature_extraction, predict_performance, plot_data
 
-class Camera:
+class Camera(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
+        self.running = False
+        self.req_exercise = None  # New: store exercise name for threading
         self.pipeline = rs.pipeline()
         self.config = rs.config()
         self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
@@ -32,6 +35,10 @@ class Camera:
         self.mp_pose = mp.solutions.pose
         self.pose = self.mp_pose.Pose(static_image_mode=False, min_detection_confidence=0.5)
         self.mp_drawing = mp.solutions.drawing_utils
+
+    def start_camera(self,ex):
+        self.req_exercise=ex
+        self.start()
 
     def stop(self):
         self.pipeline.stop()
@@ -192,7 +199,7 @@ class Camera:
         )
 
 
-    def exercise_2_angles_3d(self, exercise_name, joint1, joint2, joint3, up_lb, up_ub, down_lb, down_ub,
+    def exercise_two_angles_3d(self, exercise_name, joint1, joint2, joint3, up_lb, up_ub, down_lb, down_ub,
                                joint4, joint5, joint6, up_lb2, up_ub2, down_lb2, down_ub2, angle_classification, use_alternate_angles=False):
         flag = True
         counter = 0
@@ -227,10 +234,10 @@ class Camera:
                     right_angle2 = self.calc_angle_3d(joints[r_j4], joints[r_j5], joints[r_j6])
                     left_angle2 = self.calc_angle_3d(joints[l_j4], joints[l_j5], joints[l_j6])
 
-                new_entry = [joints[str("R_" + joint1)], joints[str("R_" + joint2)], joints[str("R_" + joint3)],
-                             joints[str("L_" + joint1)], joints[str("L_" + joint2)], joints[str("L_" + joint3)],
-                             joints[str("R_" + joint4)], joints[str("R_" + joint5)], joints[str("R_" + joint6)],
-                             joints[str("L_" + joint4)], joints[str("L_" + joint5)], joints[str("L_" + joint6)],
+                new_entry = [joints[self.get_joint_id(str("right_" + joint1.lower()))], joints[self.get_joint_id(str("right_" + joint2.lower()))], joints[self.get_joint_id(str("right_" + joint3.lower()))],
+                             joints[self.get_joint_id(str("left_" + joint1.lower()))], joints[self.get_joint_id(str("left_" + joint2.lower()))], joints[self.get_joint_id(str("left_" + joint3.lower()))],
+                             joints[self.get_joint_id(str("right_" + joint4.lower()))], joints[self.get_joint_id(str("right_" + joint5.lower()))], joints[self.get_joint_id(str("right_" + joint6.lower()))],
+                             joints[self.get_joint_id(str("left_" + joint4.lower()))], joints[self.get_joint_id(str("left_" + joint5.lower()))], joints[self.get_joint_id(str("left_" + joint6.lower()))],
                              right_angle, left_angle, right_angle2, left_angle2]
                 list_joints.append(new_entry)
                 if s.one_hand != False:
@@ -287,7 +294,8 @@ class Camera:
         elif s.one_hand=='left':
             exercise_name = exercise_name[:-9]
         s.ex_list.append([exercise_name, counter])
-        Excel.wf_joints(exercise_name, list_joints)
+        name = (exercise_name+str(time.time()))[:25]
+        Excel.wf_joints(name, list_joints)
 
     def exercise_one_angle_3d(self, exercise_name, joint1, joint2, joint3, up_lb, up_ub, down_lb, down_ub,
                               use_alternate_angles=False):
@@ -332,9 +340,11 @@ class Camera:
                             say(str(counter))
                     if (down_lb < right_angle < down_ub) & (down_lb < left_angle < down_ub) & (flag):
                         flag = False
-            if (not s.robot_count) and (counter == s.rep):
+            if (not s.robot_count) and (counter >= s.rep):
+                print("Finish")
                 s.req_exercise = ""
                 s.success_exercise = True
+
                 break
             if s.corrective_feedback and (s.robot_rep >= s.rep/2) and counter <=2 and not said_instructions:
                 say(exercise_name + "_" + str(flag))
@@ -351,7 +361,8 @@ class Camera:
         if s.adaptive:
             self.classify_performance(list_joints, exercise_name, 6, 7, counter)
         s.ex_list.append([exercise_name, counter])
-        Excel.wf_joints(exercise_name, list_joints)
+        name = (exercise_name+str(time.time()))[:25]
+        Excel.wf_joints(name, list_joints)
 
 # ------------------------------------ My Stuff -------------------------------------
     def notool_reverse_fly(self):
@@ -368,7 +379,7 @@ class Camera:
                                     "Shoulder", "Shoulder", "Wrist", 150, 180, 80, 110, "first", True)
 
     def bend_elbows(self):
-        self.exercise_one_angle_3d("bend_elbows", "Shoulder", "Elbow", "Wrist", 150, 180, 10, 50) #todo change to 2 angles - add armpit
+        self.exercise_one_angle_3d("bend_elbows", "Shoulder", "Elbow", "Wrist", 130, 180, 10, 60) #todo change to 2 angles - add armpit
 
     def raise_arms_bend_elbows(self):
         self.exercise_two_angles_3d("raise_arms_bend_elbows", "Shoulder", "Elbow", "Wrist", 130, 180, 10, 70,
@@ -401,6 +412,70 @@ class Camera:
     def raise_arms_forward_one_hand(self):
         self.exercise_two_angles_3d("raise_arms_forward_one_hand", "Wrist", "Shoulder", "Hip", 85, 135, 10, 50,
                                    "Shoulder", "Shoulder", "Wrist", 80, 115, 80, 115, "first", True)
+    def hello_waving(self):
+        self.exercise_one_angle_3d("hello_waving","Shoulder","Elbow","Wrist",20,60,70,180)
+        s.waved=True
+
+    def init_position(self):
+        if not self.running:  # Ensure camera is started
+            self.pipeline.start(self.config)
+            self.running = True
+
+        init_pos = False
+        say("calibration")
+        print("CAMERA: init position - please stand in front of the camera with hands to the sides")
+
+        while not init_pos:
+            image, joints = self.get_skeleton_data()
+            if joints is not None:
+                count = 0
+                for j in joints.values():
+                    if j is not None:
+                        count += 1
+
+                r_shoulder = self.get_joint_id("right_shoulder")
+                r_hip = self.get_joint_id("right_hip")
+                r_wrist = self.get_joint_id("right_wrist")
+                l_shoulder = self.get_joint_id("left_shoulder")
+                l_hip = self.get_joint_id("left_hip")
+                l_wrist = self.get_joint_id("left_wrist")
+
+                required = [r_shoulder, r_hip, r_wrist, l_shoulder, l_hip, l_wrist]
+
+                if all(j in joints for j in required):
+                    angle_right = self.calc_angle_3d(joints[r_shoulder], joints[r_hip], joints[r_wrist])
+                    angle_left = self.calc_angle_3d(joints[l_shoulder], joints[l_hip], joints[l_wrist])
+
+                    if count == len(joints) and angle_right > 80 and angle_left > 80:
+                        init_pos = True
+                        print("CAMERA: init position verified")
+                else:
+                    print("CAMERA: some key joints not detected.")
+            else:
+                print("CAMERA: user not detected")
+
+            cv2.imshow("Calibration View", image)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        s.calibration = True
+        say("calibration_complete")
+        cv2.destroyWindow("Calibration View")
+
+    #    def hello_waving(self):  # check if the participant waved
+#        time.sleep(4)
+#        print("Camera: Wave for start")
+#        say('ready wave')
+#        while s.req_exercise == "hello_waving":
+#            joints = self.get_skeleton_data()
+#            if joints is not None:
+#                right_shoulder = joints[self.get_joint_id(str("right_shoulder"))]
+#                right_wrist = joints[self.get_joint_id(str("right_wrist"))]
+#                if right_shoulder.y < right_wrist.y != 0:
+                    # print(right_shoulder.y)
+                    # print(right_wrist.y)
+#                    s.waved = True
+#                    s.req_exercise = ""
 
     def classify_performance(self, list_joints, exercise_name, index_angle_right, index_angle_left, counter):
         if counter > 1:
@@ -410,8 +485,8 @@ class Camera:
                 right_hand_data = df.iloc[0].dropna().to_numpy()
                 left_hand_data = df.iloc[1].dropna().to_numpy()
 
-                features = feature_extraction(right_hand_data, left_hand_data)
-                predictions = predict_performance(features, exercise_name, s.adaptation_model_name)
+                #features = feature_extraction(right_hand_data, left_hand_data)
+                #predictions = predict_performance(features, exercise_name, s.adaptation_model_name)
 
                 timestamp_key = exercise_name
                 if exercise_name in s.performance_class:
@@ -419,12 +494,12 @@ class Camera:
                     timestamp_key += str(current_time.minute) + str(current_time.second)
 
                 s.performance_class[timestamp_key] = {
-                    'right': predictions[1],
-                    'left': predictions[0]
+#                    'right': predictions[1],
+#                    'left': predictions[0]
                 }
 
                 print(f"[Camera] Performance classified: {s.performance_class}")
-                plot_data(exercise_name, right_hand_data, left_hand_data)
+#                plot_data(exercise_name, right_hand_data, left_hand_data)
 
             except Exception as e:
                 print(f"[Camera] Error during classification: {e}")
@@ -433,22 +508,33 @@ class Camera:
             s.performance_class[exercise_name] = {'right': 1, 'left': 1}  # Default if not enough rep
 
     def run(self):
+       self.running=True
        try:
-           while True:
-               image, joints = camera.get_skeleton_data()
+           print("CAMERA STARTED")
+           while not s.finish_workout:
+               #time.sleep(0.00000001)
+               image, joints = self.get_skeleton_data()
                if image is None:
                    continue
-
                if joints:
-                   print("About to Run")
-                   self.bend_elbows()
-                   print("Just took a quick lap")
+                   if s.req_exercise == "hello_waving":
+                       self.hello_waving()
+                       s.req_exercise = ""
+                       s.camera_done = True
 
-               cv2.imshow("Skeleton", image)
-               if cv2.waitKey(1) & 0xFF == ord('q'):
-                   break
+                   else:
+                    if s.req_exercise != "":
+                        print("CAMERA: Exercise", s.req_exercise," ", s.rep, "reps; start")
+                        time.sleep(1)
+                        getattr(self, s.req_exercise)()
+                        print("CAMERA: Exercise ", s.req_exercise, " done")
+                        s.req_exercise = ""
+                        s.camera_done = True
+
+           print("Camera Done")
+
        finally:
-           camera.stop()
+           self.stop()
 
 
 if __name__ == "__main__":
@@ -460,13 +546,13 @@ if __name__ == "__main__":
     s.rep = 2
     s.corrective_feedback = False
     s.one_hand = 'right'
-    s.req_exercise = "bend_elbows"
+    s.req_exercise = "hello_waving"
     s.robot_count = False
     Excel.create_workbook()
     s.ex_list = []
     s.adaptive = True
     if s.adaptive:
-        s.adaptation_model_name = 'model2'
+        s.adaptation_model_name = 'model2_resaved'
         s.performance_class = {}
     print('HelloServer')
     camera = Camera()

@@ -1,7 +1,7 @@
 import time
 import Settings as s
 import Excel
-from Camera import Camera
+from Camera_Test import Camera
 from Poppy import Poppy
 from Audio import Audio
 from Training import Training
@@ -26,8 +26,8 @@ if __name__ == '__main__':
     # Audio variables initialization
     language = 'Hebrew'
     gender = 'Male'
-    s.audio_path = 'audio files/' + language + '/' + gender + '/'
-    s.picture_path = 'audio files/' + language + '/' + gender + '/'
+    #s.audio_path = 'audio files/' + language + '/' + gender + '/'
+    #s.picture_path = 'audio files/' + language + '/' + gender + '/'
     # s.str_to_say = ""
     current_time = datetime.datetime.now()
     s.participant_code = str(current_time.day) + "." + str(current_time.month) + " " + str(current_time.hour) + "." + \
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     # Training variables initialization
     s.exercise_amount = 6
     s.rep = 8
-    s.req_exercise = ""
+    s.req_exercise = "bend_elbows"
     s.finish_workout = False
     s.waved = False
     s.success_exercise = False
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     s.training_done = False
     s.poppy_done = False
     s.camera_done = False
-    s.robot_count = True
+    s.robot_count = False
     s.try_again = False
     # Excel variable
     Excel.create_workbook()
@@ -65,7 +65,7 @@ if __name__ == '__main__':
         # s.adaptation_model = pickle.load(open(f'{adaptation_model_name}.sav', 'rb'))
 
     # Start all threads
-    s.camera.start()
+    s.camera.start_camera(s.req_exercise)
     s.training.start()
     s.robot.start()
     s.screen = Screen()

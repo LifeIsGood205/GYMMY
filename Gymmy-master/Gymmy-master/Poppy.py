@@ -9,8 +9,8 @@ class Poppy(threading.Thread):
 
     def __init__(self):
         threading.Thread.__init__(self)
-        self.poppy = PoppyTorso()  # for real robot
-        # self.poppy = PoppyTorso(simulator='vrep')  # for simulator
+        #self.poppy = PoppyTorso()  # for real robot
+        self.poppy = PoppyTorso(simulator='vrep')  # for simulator
         print("ROBOT INITIALIZATION")
         for m in self.poppy.motors:  # motors need to be initialized, False=stiff, True=loose
             m.compliant = False
@@ -30,6 +30,7 @@ class Poppy(threading.Thread):
             time.sleep(0.00000001)  # Prevents the MP to stuck
             if s.req_exercise != "" and not (s.req_exercise=="hello_waving" and s.try_again): # if there is exercise, or hello waving
                 time.sleep(1)
+                #s.req_exercise = "bend_elbows"
                 print("ROBOT: Exercise ", s.req_exercise, " start")
                 self.exercise_demo(s.req_exercise)
                 print("ROBOT: Exercise ", s.req_exercise, " done")
@@ -64,6 +65,40 @@ class Poppy(threading.Thread):
         self.poppy.r_shoulder_x.goto_position(0, 1.5, wait=False)
         self.poppy.r_elbow_y.goto_position(90, 1.5, wait=False)
         self.poppy.r_arm_z.goto_position(0, 1.5, wait=False)
+# ------------------------------------ My Stuff -------------------------------------
+    def notool_reverse_fly(self,counter):
+        self.poppy.r_elbow_y.goto_position(0, 1.75, wait=False)
+        self.poppy.l_elbow_y.goto_position(0, 1.75, wait=False)
+        self.poppy.r_arm_z.goto_position(0, 1.5, wait=False)
+        self.poppy.l_arm_z.goto_position(0, 1.5, wait=False)
+        self.poppy.l_shoulder_y.goto_position(-75, 1, wait=False)
+        self.poppy.r_shoulder_y.goto_position(-75, 1, wait=False)
+        in_front = [self.poppy.r_shoulder_x.goto_position(-5, 1.25, wait=False),
+                    self.poppy.l_shoulder_x.goto_position(5, 1.25, wait=True)]
+        time.sleep(1)
+        extended = [self.poppy.r_shoulder_x.goto_position(-80, 1.25, wait=False),
+                    self.poppy.l_shoulder_x.goto_position(80, 1.25, wait=True)]
+        if s.robot_count:
+            say(str(counter + 1))
+        time.sleep(1)
+
+    def vertical_skullcrusher(self,counter):
+        self.poppy.r_arm_z.goto_position(20, 1.5, wait=False)
+        self.poppy.l_arm_z.goto_position(-20, 1.5, wait=False)
+        self.poppy.l_shoulder_y.goto_position(-150, 1, wait=False)
+        self.poppy.r_shoulder_y.goto_position(-150, 1, wait=False)
+        self.poppy.r_shoulder_x.goto_position(-5, 1.25, wait=False)
+        self.poppy.l_shoulder_x.goto_position(5, 1.25, wait=False)
+        down = [self.poppy.r_elbow_y.goto_position(-60, 1.75, wait=False),
+                    self.poppy.l_elbow_y.goto_position(-60, 1.75, wait=True)]
+        time.sleep(1)
+        raised = [self.poppy.r_elbow_y.goto_position(60, 1.75, wait=False),
+                    self.poppy.l_elbow_y.goto_position(60, 1.75, wait=True)]
+        if s.robot_count:
+            say(str(counter + 1))
+        time.sleep(1)
+
+
 
     # EX1 - Raise arms horizontally
     def raise_arms_horizontally(self, counter):
@@ -298,7 +333,7 @@ if __name__ == "__main__":
     robot = Poppy()
 
     # robot.exercise_demo("open_and_close_arms_90")
-    robot.exercise_demo("raise_arms_horizontally")
+    robot.exercise_demo("bend_elbows")
     # robot.start()
     time.sleep(10)
 

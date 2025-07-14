@@ -18,12 +18,12 @@ class Training(threading.Thread):
             time.sleep(0.00000001)  # Prevents the MP to stuck
             continue
         s.waved = False # set as False again for future
-        if not s.calibration:
-            print("Training: Calibration")
-            s.camera.init_position()
-            while not s.calibration:
-                time.sleep(0.00000001)
-                continue
+        #if not s.calibration:
+        #    print("Training: Calibration")
+        #    s.camera.init_position()
+        #    while not s.calibration:
+        #        time.sleep(0.00000001)
+        #        continue
         time.sleep(3)
         say('lets start')
         time.sleep(2.5)
