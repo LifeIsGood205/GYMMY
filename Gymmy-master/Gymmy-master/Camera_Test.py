@@ -267,7 +267,8 @@ class Camera(threading.Thread):
                     if (down_lb < right_angle < down_ub) & (down_lb < left_angle < down_ub) & \
                             (down_lb2 < right_angle2 < down_ub2) & (down_lb2 < left_angle2 < down_ub2) & (flag):
                         flag = False
-            if (not s.robot_count) and (counter == s.rep):
+            if (not s.robot_count) and (counter >= s.rep):
+                s.camera_done = True
                 s.req_exercise = ""
                 s.success_exercise = True
                 break
@@ -341,6 +342,7 @@ class Camera(threading.Thread):
                     if (down_lb < right_angle < down_ub) & (down_lb < left_angle < down_ub) & (flag):
                         flag = False
             if (not s.robot_count) and (counter >= s.rep):
+                s.camera_done = True
                 print("Finish")
                 s.req_exercise = ""
                 s.success_exercise = True
@@ -372,6 +374,24 @@ class Camera(threading.Thread):
     def vertical_skullcrusher(self):
         self.exercise_two_angles_3d("vertical_skullcrusher","Hip","Shoulder","Elbow",130,170,130,170,
                                     "Shoulder","Elbow","Wrist",90,150,20,45,"first",True)
+
+    def ball_open_arms_above_head(self):
+        self.exercise_two_angles_3d("ball_open_arms_above_head","Shoulder","Elbow","Wrist",130,170,130,170,
+                                    "Hip","Shoulder","Elbow",130,180,50,100,"first",True)
+    def ball_open_arms_forward(self):
+        self.exercise_two_angles_3d("ball_open_arms_forward","Shoulder","Shoulder","Elbow",130,170,50,100,
+                                    "Hip","Shoulder","Elbow",50,90,50,90,"first",True)
+    def ball_raise_arms_above_head(self):
+        self.exercise_two_angles_3d("ball_raise_arms_above_head","wrist","shoulder","hip",30,90,
+                                    "Shoulder","Elbow","Wrist",130,170,130,170,"first",True)
+    def band_open_arms(self):
+        self.exercise_two_angles_3d("band_open_arms","shoulder","shoulder","wrist",70,120,150,180,
+                                    "Hip","shoulder","wrist",70,100,70,100,"first",True)
+    def band_open_arms_and_up(self):
+        self.exercise_two_angles_3d("band_open_arms_and_up","shoulder","shoulder","wrist",70,120,150,180,
+                                    "Hip","shoulder","wrist",70,100,130,180,"first",True)
+
+
 
 
     def raise_arms_horizontally(self):
@@ -524,12 +544,11 @@ class Camera(threading.Thread):
 
                    else:
                     if s.req_exercise != "":
+                        s.camera_done = False
                         print("CAMERA: Exercise", s.req_exercise," ", s.rep, "reps; start")
                         time.sleep(1)
                         getattr(self, s.req_exercise)()
                         print("CAMERA: Exercise ", s.req_exercise, " done")
-                        s.req_exercise = ""
-                        s.camera_done = True
 
            print("Camera Done")
 

@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     # Training variables initialization
     s.exercise_amount = 6
-    s.rep = 8
+    s.rep = 2
     s.req_exercise = "bend_elbows"
     s.finish_workout = False
     s.waved = False

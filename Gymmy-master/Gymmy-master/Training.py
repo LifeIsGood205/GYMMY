@@ -45,11 +45,11 @@ class Training(threading.Thread):
             while (not s.poppy_done) or (not s.camera_done):
                 print("not done")
                 time.sleep(1)
-            s.poppy_done = False
-            s.camera_done = False
+            #s.poppy_done = False
+            #s.camera_done = False
 
-        right_values = [value['right'] for value in s.performance_class.values()]
-        left_values = [value['left'] for value in s.performance_class.values()]
+        right_values = [value.get('right',0) for value in s.performance_class.values()]
+        left_values = [value.get('left',0) for value in s.performance_class.values()]
         if sum(right_values) > 1.1 and sum(left_values) > 1.1:
             print("problem in both hands!")
             s.corrective_feedback = True
@@ -70,8 +70,9 @@ class Training(threading.Thread):
             s.try_again = True
             say("adaptive_bothgood")
 
-        exercise_names = ["raise_arms_bend_elbows", "open_and_close_arms",
-                          "open_and_close_arms_90", "raise_arms_forward"]
+        exercise_names = ["notool_reverse_fly","vertical_skullcrusher","ball_open_arms_above_head",
+                          "ball_open_arms_forward","ball_raise_arms_above_head","band_open_arms","band_open_arms_and_up",
+                          "raise_arms_bend_elbows", "open_and_close_arms","open_and_close_arms_90", "raise_arms_forward"]
         if s.one_hand == False:
             for e in exercise_names:
                 time.sleep(2)  # wait between exercises

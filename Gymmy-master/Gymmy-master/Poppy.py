@@ -34,14 +34,17 @@ class Poppy(threading.Thread):
                 print("ROBOT: Exercise ", s.req_exercise, " start")
                 self.exercise_demo(s.req_exercise)
                 print("ROBOT: Exercise ", s.req_exercise, " done")
-                if not s.calibration: #meaning it's the first hello
-                    while not s.waved:
-                        time.sleep(0.01)  # for hello_waiting exercise, wait until user wave
-                s.req_exercise = ""
                 s.poppy_done = True
+                if s.camera_done or s.req_exercise=="hello_waving":
+                    print("Moving on")
+                    s.req_exercise = ""
+
         print("Robot Done")
 
     def exercise_demo(self, ex):
+        if not ex or not hasattr(self, ex):
+            print(f"Invalid or empty exercise name: '{ex}'")
+            return
         if ex == "hello_waving":
             self.hello_waving()
         else:
@@ -97,6 +100,92 @@ class Poppy(threading.Thread):
         if s.robot_count:
             say(str(counter + 1))
         time.sleep(1)
+
+    def ball_open_arms_above_head(self,counter):
+        self.poppy.r_arm_z.goto_position(20, 1.5, wait=False)
+        self.poppy.l_arm_z.goto_position(-20, 1.5, wait=False)
+        self.poppy.l_shoulder_y.goto_position(-180, 1, wait=False)
+        self.poppy.r_shoulder_y.goto_position(-180, 1, wait=False)
+        self.poppy.r_shoulder_x.goto_position(-5, 1.25, wait=False)
+        self.poppy.l_shoulder_x.goto_position(5, 1.25, wait=False)
+        open=[self.poppy.r_shoulder_x.goto_position(-90, 1.5, wait=False),
+              self.poppy.l_shoulder_x.goto_position(90, 1.5, wait=False)]
+        time.sleep(1)
+        close=[self.poppy.r_shoulder_x.goto_position(-5, 1.5, wait=False),
+               self.poppy.l_shoulder_x.goto_position(5, 1.5, wait=False)]
+        if s.robot_count:
+            say(str(counter + 1))
+        time.sleep(1)
+
+    def ball_open_arms_forward(self,counter):
+        self.poppy.r_arm_z.goto_position(20, 1.5, wait=False)
+        self.poppy.l_arm_z.goto_position(-20, 1.5, wait=False)
+        self.poppy.l_shoulder_y.goto_position(-90, 1, wait=False)
+        self.poppy.r_shoulder_y.goto_position(-90, 1, wait=False)
+        self.poppy.r_shoulder_x.goto_position(-5, 1.25, wait=False)
+        self.poppy.l_shoulder_x.goto_position(5, 1.25, wait=False)
+        open=[self.poppy.r_shoulder_x.goto_position(-70, 1.5, wait=False),
+              self.poppy.l_shoulder_x.goto_position(70, 1.5, wait=False)]
+        time.sleep(1)
+        close=[self.poppy.r_shoulder_x.goto_position(10, 1.5, wait=False),
+               self.poppy.l_shoulder_x.goto_position(-10, 1.5, wait=False)]
+        if s.robot_count:
+            say(str(counter + 1))
+        time.sleep(1)
+
+    def band_open_arms_and_up(self,counter):
+        self.poppy.r_arm_z.goto_position(20, 1.5, wait=False)
+        self.poppy.l_arm_z.goto_position(-20, 1.5, wait=False)
+        self.poppy.l_shoulder_y.goto_position(-90, 1, wait=False)
+        self.poppy.r_shoulder_y.goto_position(-90, 1, wait=False)
+        self.poppy.r_shoulder_x.goto_position(-5, 1.25, wait=False)
+        self.poppy.l_shoulder_x.goto_position(5, 1.25, wait=False)
+        open=[self.poppy.r_shoulder_x.goto_position(-50, 1.5, wait=False),
+              self.poppy.l_shoulder_x.goto_position(50, 1.5, wait=False)]
+        time.sleep(1)
+        up=[self.poppy.l_shoulder_y.goto_position(-180,1,wait=False),
+            self.poppy.r_shoulder_y.goto_position(-180,1,wait=False)]
+        time.sleep(1)
+        down=[self.poppy.l_shoulder_y.goto_position(-90,1,wait=False),
+              self.poppy.r_shoulder_y.goto_position(-90,1,wait=False)]
+        time.sleep(1)
+        close=[self.poppy.r_shoulder_x.goto_position(-5, 1.5, wait=False),
+               self.poppy.l_shoulder_x.goto_position(5, 1.5, wait=False)]
+        if s.robot_count:
+            say(str(counter + 1))
+        time.sleep(1)
+    def band_open_arms(self,counter):
+        self.poppy.r_arm_z.goto_position(20, 1.5, wait=False)
+        self.poppy.l_arm_z.goto_position(-20, 1.5, wait=False)
+        self.poppy.l_shoulder_y.goto_position(-90, 1, wait=False)
+        self.poppy.r_shoulder_y.goto_position(-90, 1, wait=False)
+        self.poppy.r_shoulder_x.goto_position(-5, 1.25, wait=False)
+        self.poppy.l_shoulder_x.goto_position(5, 1.25, wait=False)
+        open=[self.poppy.r_shoulder_x.goto_position(-50, 1.5, wait=False),
+              self.poppy.l_shoulder_x.goto_position(50, 1.5, wait=False)]
+        time.sleep(1)
+        close=[self.poppy.r_shoulder_x.goto_position(-5, 1.5, wait=False),
+               self.poppy.l_shoulder_x.goto_position(5, 1.5, wait=False)]
+        if s.robot_count:
+            say(str(counter + 1))
+        time.sleep(1)
+
+    def ball_raise_arms_above_head(self,counter):
+        self.poppy.r_arm_z.goto_position(20, 1.5, wait=False)
+        self.poppy.l_arm_z.goto_position(-20, 1.5, wait=False)
+        self.poppy.l_shoulder_y.goto_position(-90, 1, wait=False)
+        self.poppy.r_shoulder_y.goto_position(-90, 1, wait=False)
+        self.poppy.r_shoulder_x.goto_position(10, 1.25, wait=False)
+        self.poppy.l_shoulder_x.goto_position(-10, 1.25, wait=False)
+        open = [self.poppy.r_shoulder_y.goto_position(-90, 1.5, wait=False),
+                self.poppy.l_shoulder_y.goto_position(-90, 1.5, wait=False)]
+        time.sleep(1)
+        close = [self.poppy.r_shoulder_y.goto_position(-180, 1.5, wait=False),
+                 self.poppy.l_shoulder_y.goto_position(-180, 1.5, wait=False)]
+        if s.robot_count:
+            say(str(counter + 1))
+        time.sleep(1)
+
 
 
 
@@ -333,7 +422,7 @@ if __name__ == "__main__":
     robot = Poppy()
 
     # robot.exercise_demo("open_and_close_arms_90")
-    robot.exercise_demo("bend_elbows")
+    robot.exercise_demo("ball_raise_arms_above_head")
     # robot.start()
     time.sleep(10)
 
