@@ -71,7 +71,7 @@ class Training(threading.Thread):
             say("adaptive_bothgood")
 
         exercise_names = ["notool_reverse_fly","vertical_skullcrusher","ball_open_arms_above_head",
-                          "ball_open_arms_forward","ball_raise_arms_above_head","band_open_arms","band_open_arms_and_up",
+                          "ball_raise_arms_above_head","band_open_arms",
                           "raise_arms_bend_elbows", "open_and_close_arms","open_and_close_arms_90", "raise_arms_forward"]
         if s.one_hand == False:
             for e in exercise_names:
