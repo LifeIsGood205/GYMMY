@@ -169,8 +169,14 @@ class Camera(threading.Thread):
         ba = a - b
         bc = c - b
 
-        ba_norm = ba / np.linalg.norm(ba)
-        bc_norm = bc / np.linalg.norm(bc)
+        if np.linalg.norm(ba) == 0:
+            ba_norm = ba
+        else:
+            ba_norm = ba / np.linalg.norm(ba)
+        if np.linalg.norm(bc) == 0:
+            bc_norm = bc
+        else:
+            bc_norm = bc / np.linalg.norm(bc)
 
         cosine_angle = np.dot(ba_norm, bc_norm)
         angle_rad = np.arccos(np.clip(cosine_angle, -1.0, 1.0))
@@ -184,8 +190,14 @@ class Camera(threading.Thread):
         ba = a - b
         bc = c - b
 
-        ba_norm = ba / np.linalg.norm(ba)
-        bc_norm = bc / np.linalg.norm(bc)
+        if np.linalg.norm(ba)==0:
+            ba_norm=ba
+        else:
+            ba_norm = ba / np.linalg.norm(ba)
+        if np.linalg.norm(bc)==0:
+            bc_norm=bc
+        else:
+            bc_norm = bc / np.linalg.norm(bc)
 
         cosine_angle = np.dot(ba_norm, bc_norm)
         angle_rad = np.arccos(np.clip(cosine_angle, -1.0, 1.0))
@@ -368,8 +380,8 @@ class Camera(threading.Thread):
 
 # ------------------------------------ My Stuff -------------------------------------
     def notool_reverse_fly(self):
-        self.exercise_two_angles_3d("notool_reverse_fly","Hip","Shoulder","Elbow",70,100,70,100,
-                                    "Shoulder","Shoulder","Elbow",150,180,50,90,"first",True)
+        self.exercise_two_angles_3d("notool_reverse_fly","Hip","Shoulder","Elbow",50,120,50,120,
+                                    "Shoulder","Shoulder","Elbow",130,190,30,100,"first",True)
 
     def vertical_skullcrusher(self):
         self.exercise_two_angles_3d("vertical_skullcrusher","Hip","Shoulder","Elbow",130,170,130,170,
@@ -379,17 +391,15 @@ class Camera(threading.Thread):
         self.exercise_two_angles_3d("ball_open_arms_above_head","Shoulder","Elbow","Wrist",130,170,130,170,
                                     "Hip","Shoulder","Elbow",130,180,50,100,"first",True)
     def ball_open_arms_forward(self):
-        self.exercise_two_angles_3d("ball_open_arms_forward","Shoulder","Shoulder","Elbow",130,170,50,100,
-                                    "Hip","Shoulder","Elbow",50,90,50,90,"first",True)
+        self.exercise_two_angles_3d("ball_open_arms_forward","Shoulder","Shoulder","Elbow",130,190,50,100,
+                                    "Hip","Shoulder","Elbow",30,120,30,120,"first",True)
     def ball_raise_arms_above_head(self):
-        self.exercise_two_angles_3d("ball_raise_arms_above_head","wrist","shoulder","hip",30,90,
-                                    "Shoulder","Elbow","Wrist",130,170,130,170,"first",True)
+        self.exercise_one_angle_3d("ball_raise_arms_above_head","elbow","shoulder","hip",130,190,30,120)
     def band_open_arms(self):
-        self.exercise_two_angles_3d("band_open_arms","shoulder","shoulder","wrist",70,120,150,180,
-                                    "Hip","shoulder","wrist",70,100,70,100,"first",True)
+        self.exercise_one_angle_3d("band_open_arms","shoulder","shoulder","elbow",130,190,30,100,True)
     def band_open_arms_and_up(self):
-        self.exercise_two_angles_3d("band_open_arms_and_up","shoulder","shoulder","wrist",70,120,150,180,
-                                    "Hip","shoulder","wrist",70,100,130,180,"first",True)
+        self.exercise_two_angles_3d("band_open_arms_and_up","shoulder","shoulder","elbow",70,120,150,190,
+                                    "Hip","shoulder","elbow",70,100,130,190,"first",True)
 
 
 
